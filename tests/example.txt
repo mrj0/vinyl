@@ -1,0 +1,1 @@
+a customer name with max length=50,         9,00:00:00
