@@ -15,7 +15,7 @@ setup(
     name='vinyl',
     description='Mutable record type for dealing with flat files like CSV or pipe-delimited data',
     long_description=read_file('README.rst'),
-    version='0.1',
+    version='0.3',
     url='https://github.com/mrj0/vinyl/',
     license='BSD License',
     classifiers=[
