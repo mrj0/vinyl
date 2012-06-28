@@ -26,6 +26,8 @@ class TestFormat(Record):
     nine = FixedCharField(field_length=30)
     ten = VarCharField(required=True)
 
+    stripped = RecordField(strip=True)
+
 def test_record():
     record = TestFormat()
     assert_equal(record.one, 'w00t')
@@ -62,6 +64,9 @@ def test_record():
 
     record.nine = 'Keep Calm and Carry On'
     assert_equal(record.nine, 'Keep Calm and Carry On        ')
+
+    record.stripped = '    a    '
+    assert_equal(record.stripped, 'a')
 
     with assert_raises(ValidationError):
         record.ten = ''

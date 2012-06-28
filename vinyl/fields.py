@@ -3,7 +3,7 @@ from datetime import datetime
 
 class ValidationError(Exception):
     def __init__(self, field_name, message):
-        super(ValidationError, self).__init__('{0}: {1}'.format(field_name, message))
+        super(ValidationError, self).__init__(u'{0}: {1}'.format(field_name, message))
 
 
 class BaseField(object):
@@ -13,6 +13,7 @@ class BaseField(object):
     ``value`` - set the initial value for this field
     ``max_length`` - the maximum length
     ``zfill`` - for value.zfill()
+    ``strip`` - remove spaces from value if True
     ``required`` - used with validate (default False)
     """
 
@@ -25,15 +26,18 @@ class BaseField(object):
                  value=None,
                  max_length=None,
                  zfill=None,
+                 strip=False,
                  required=False):
         super(BaseField, self).__init__()
         BaseField.creation_counter += 1
         self.created_order = BaseField.creation_counter
-        self.value = value
         self.max_length = max_length
         self.zfill = zfill
         self.field_name = None   # filled in by RecordMetaclass
         self.required = required
+        self.strip = strip
+
+        self.value = self.to_record(value)
 
     def to_unicode(self, value):
         if value is None:
@@ -65,16 +69,18 @@ class BaseField(object):
     def clean_record(self, value):
         value = self.to_unicode(value)
         if value is not None:
-            if self.max_length is not None:
-                value = value[:self.max_length]
+            if self.strip:
+                value = value.strip()
             if self.zfill is not None:
                 value = value.zfill(self.zfill)
+            if self.max_length is not None:
+                value = value[:self.max_length]
 
         return value
 
     def validate(self):
         if self.required and not self.value:
-            self.raise_invalid('Field is required')
+            self.raise_invalid(u'Field is required')
 
 
 class RecordField(BaseField):
@@ -83,14 +89,15 @@ class RecordField(BaseField):
 
 class VarCharField(BaseField):
     """
-    A validating char field
+    A validating variable-length character field. Raises an error if
+    the length is > max_length (max_length must not be None)
     """
 
     def clean_record(self, value):
         value = self.to_unicode(value)
         if value is not None:
             if self.max_length is not None and len(value) > self.max_length:
-                self.raise_invalid('Value too long: {0}'.format(value))
+                self.raise_invalid(u'Value too long: {0}'.format(value))
 
         return super(VarCharField, self).clean_record(value)
 
@@ -109,16 +116,17 @@ class FixedCharField(BaseField):
 
     def clean_record(self, value):
         value = self.to_unicode(value)
-        if value is not None:
-            if self.field_length is not None:
-                if self.justify == 'right':
-                    value = value.rjust(self.field_length, self.pad_with)
-                elif self.justify == 'left':
-                    value = value.ljust(self.field_length, self.pad_with)
-                else:
-                    self.raise_invalid('Unknown value for justify: {0}'.format(self.justify))
+        if value is None:
+            value = ''
+        if self.field_length is not None:
+            if self.justify == 'right':
+                value = value.rjust(self.field_length, self.pad_with)
+            elif self.justify == 'left':
+                value = value.ljust(self.field_length, self.pad_with)
             else:
-                self.raise_invalid('Missing field_length')
+                self.raise_invalid(u'Unknown value for justify: {0}'.format(self.justify))
+        else:
+            self.raise_invalid(u'Missing field_length')
 
         return super(FixedCharField, self).clean_record(value[0:self.field_length])
 
@@ -137,10 +145,10 @@ class IntegerField(BaseField):
             value = int(value)
             if self.min_value is not None:
                 if value < self.min_value:
-                    self.raise_invalid('Value must be at least {0}'.format(self.min_value))
+                    self.raise_invalid(u'Value must be at least {0}'.format(self.min_value))
             if self.max_value is not None:
                 if value > self.max_value:
-                    self.raise_invalid('Value must be no greater than {0}'.format(self.max_value))
+                    self.raise_invalid(u'Value must be no greater than {0}'.format(self.max_value))
 
         return super(IntegerField, self).clean_record(value)
 
