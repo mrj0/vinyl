@@ -34,6 +34,11 @@ class Record(object):
 
     def __init__(self, *args, **kw):
         super(Record, self).__init__()
+
+        # make instance variables out of all the fields
+        set_attr = super(Record, self).__setattr__
+        map(lambda x: set_attr(x.field_name, x.value), self._fields.values())
+
         self._load(*args, **kw)
 
     def _load(self, *args, **kw):
@@ -66,28 +71,29 @@ class Record(object):
         return len(self._fields)
 
     def __getitem__(self, index):
-        return self._fields.values()[index].value
+        key = self._fields.keys()[index]
+        return self.__getattr__(key)
 
     def __setitem__(self, index, value):
-        name, field = self._fields.items()[index]
-        self._fields[name].value = field.to_record(value)
+        key = self._fields.keys()[index]
+        return self.__setattr__(key, value)
 
     def __setattr__(self, key, value):
         key = key.lower()
         field = self._fields[key]
-        self._fields[key].value = field.to_record(value)
+        return super(Record, self).__setattr__(key, field.to_record(value))
 
     def __getattr__(self, key):
-        return self._fields[key.lower()].value
+        return super(Record, self).__getattribute__(key.lower())
 
     def __iter__(self):
-        for name, field in self._fields.items():
-            yield field.value
+        for name in self._fields.keys():
+            yield getattr(self, name)
 
     def __repr__(self):
         return '{0}({1})'.format(
             self.__class__.__name__,
-            ', '.join(map(lambda x: "{0}={1}".format(x[0], repr(x[1].value)), self._fields.items())),
+            ', '.join(map(lambda x: "{0}={1}".format(x, getattr(self, x)), self._fields.keys())),
         )
 
     def __delattr__(self, name):

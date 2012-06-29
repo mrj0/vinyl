@@ -2,7 +2,7 @@
 from datetime import datetime
 from nose.tools import (
     assert_equal, assert_is_not_none, assert_is_none,
-    assert_raises, assert_true)
+    assert_raises, assert_true, assert_not_equal)
 import pytz
 from vinyl.fields import RecordField, VarCharField, FixedCharField,\
     IntegerField, DateField, TimeField, ValidationError
@@ -76,6 +76,13 @@ def test_record():
         record._validate()
 
     assert_equal([f for f in record], list(record), 'should support iteration')
+
+def test_instance():
+    a = TestFormat()
+    b = TestFormat()
+    a.one = 'a'
+    b.one = 'b'
+    assert_not_equal(a.one, b.one)
 
 def test_lead():
     record = LeadFormat(ERROR_CODE=None)
