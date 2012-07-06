@@ -8,7 +8,12 @@ log = logging.getLogger('vinyl')
 
 class RecordMetaclass(type):
     def __new__(mcs, class_name, bases, dct):
+        base_fields = OrderedDict()
+        for base in bases:
+            if hasattr(base, '_fields'):
+                base_fields.update(base._fields)
         fields = OrderedDict()
+        fields.update(base_fields)
         unordered = [(name.lower(), value) for name, value in dct.items() if isinstance(value, BaseField)]
         map(lambda x: fields.__setitem__(*x), sorted(unordered, key=lambda item: item[1].created_order))
 
