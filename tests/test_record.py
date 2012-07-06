@@ -28,6 +28,9 @@ class TestFormat(Record):
 
     stripped = RecordField(strip=True)
 
+class TestFormatExtended(TestFormat):
+    eleven = RecordField(value='New field!')
+
 def test_record():
     record = TestFormat()
     assert_equal(record.one, 'w00t')
@@ -76,6 +79,25 @@ def test_record():
         record._validate()
 
     assert_equal([f for f in record], list(record), 'should support iteration')
+
+def test_subclass():
+    record = TestFormat()
+    new_record = TestFormatExtended()
+
+    #record has no fields that are not also in new_record
+    assert_equal(set([]), set(record.__dict__)-set(new_record.__dict__))
+    #new_record has one field that record doesn't, which is 'eleven'
+    assert_equal(set(['eleven']), set(new_record.__dict__)-set(record.__dict__))
+
+    #should have inherited field one with same initial value
+    assert_equal(new_record.one, 'w00t')
+    #new field
+    assert_equal(new_record.eleven, 'New field!')
+    #fields three and six should have settings inherited from parent
+    new_record.three = 5
+    assert_equal(new_record.three, '00005')
+    assert_raises(ValidationError, setattr, new_record, 'six', '01234567890ads')
+
 
 def test_instance():
     a = TestFormat()
