@@ -81,7 +81,13 @@ def test_record():
     assert_equal([f for f in record], list(record), 'should support iteration')
 
 def test_subclass():
+    record = TestFormat()
     new_record = TestFormatExtended()
+
+    #record has no fields that are not also in new_record
+    assert_equal(set([]), set(record.__dict__)-set(new_record.__dict__))
+    #new_record has one field that record doesn't, which is 'eleven'
+    assert_equal(set(['eleven']), set(new_record.__dict__)-set(record.__dict__))
 
     #should have inherited field one with same initial value
     assert_equal(new_record.one, 'w00t')
