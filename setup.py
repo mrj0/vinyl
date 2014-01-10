@@ -3,6 +3,7 @@
 import codecs
 from distutils.core import setup
 import os
+from setuptools.command import develop
 
 
 def read_file(name):
