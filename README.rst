@@ -7,7 +7,7 @@ Dealing with flat files is painful. Instead, use vinyl to declaratively describe
 common flat file formats. Vinyl gives you the convenience of attribute-style access
 like a namedtuple, but in a mutable data type suitable for easily transforming data.
 
-::
+.. code:: python
 
     import os
     import csv
