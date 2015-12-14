@@ -16,11 +16,11 @@ setup(
     name='vinyl',
     description='Mutable record type for dealing with flat files like CSV or pipe-delimited data',
     long_description=read_file('README.rst'),
-    version='0.5',
+    version='0.6',
     url='https://github.com/mrj0/vinyl/',
     license='BSD License',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         ],
     packages=['vinyl'],
     )
